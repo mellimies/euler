@@ -13,11 +13,13 @@ def is_prime(n):
     return True
 
 
-def get_primes_up_to(limit):
+def get_primes_up_to(limit, start = 2):
     # return primes either up to specific value
 
-    nums = filter(is_prime, xrange(3, limit+1, 2))
-    return [2] + nums
+    nums = filter(is_prime, xrange(start, limit+1, 2))
+    if start == 2:
+        nums = [2] + nums
+    return nums
 
 def int2nums(num):
     return map(int, list(str(num)))
