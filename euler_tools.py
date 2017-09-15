@@ -16,10 +16,25 @@ def is_prime(n):
 def get_primes_up_to(limit, start = 2):
     # return primes either up to specific value
 
-    nums = filter(is_prime, xrange(start, limit+1, 2))
+    num_start = 3 if start == 2 else start
+
+    nums = filter(is_prime, xrange(num_start, limit+1, 2))
+    #print nums, start, num_start
     if start == 2:
         nums = [2] + nums
     return nums
 
 def int2nums(num):
     return map(int, list(str(num)))
+
+def get_next_prime_up_from(num):
+    if num < 2:
+        return 2
+    elif num == 2:
+        return 3
+    while True:
+#        print "NUM", num
+        num = num + 2 if num % 2 else num + 1
+        if is_prime(num):
+            return num
+        num += 2
