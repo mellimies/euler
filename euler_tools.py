@@ -42,3 +42,21 @@ def get_next_prime_up_from(num):
 def factors(n):
     return set(reduce(list.__add__,
                 ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
+
+# Problem 102. Tried myself to find an algorigthm to check for point in triangle for a day... this is from SO
+
+def sign(p1, p2, p3):
+  return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1])
+
+
+def point_in_AABB(pt, c1, c2):
+  return c2[0] <= pt[0] <= c1[0] and \
+         c2[1] <= pt[1] <= c1[1]
+
+def point_in_triangle(pt, v1, v2, v3):
+  b1 = sign(pt, v1, v2) <= 0
+  b2 = sign(pt, v2, v3) <= 0
+  b3 = sign(pt, v3, v1) <= 0
+
+  return ((b1 == b2) and (b2 == b3)) and \
+         point_in_AABB(pt, map(max, v1, v2, v3), map(min, v1, v2, v3))
