@@ -13,7 +13,7 @@ def is_prime(n):
     return True
 
 
-def get_primes_up_to(limit, start = 2):
+def get_primes_up_to(limit, start=2):
     # return primes either up to specific value
 
     num_start = 3 if start == 2 else start
@@ -24,8 +24,19 @@ def get_primes_up_to(limit, start = 2):
         nums = [2] + nums
     return nums
 
-def int2nums(num):
-    return map(int, list(str(num)))
+def magic(x):
+    if x < 10:
+        return [x]
+    else:
+        return magic(x//10) + [x%10]
+
+num_cache = dict()
+
+def int2nums(num, cache=num_cache):
+    if not num in num_cache:
+        cache[num] = magic(num)
+    #return magic(num)
+    return cache[num]
 
 def get_next_prime_up_from(num):
     if num < 2:
@@ -60,3 +71,27 @@ def point_in_triangle(pt, v1, v2, v3):
 
   return ((b1 == b2) and (b2 == b3)) and \
          point_in_AABB(pt, map(max, v1, v2, v3), map(min, v1, v2, v3))
+
+from math import sqrt, pow, log10
+def oldF(n):
+    return ((1+sqrt(5))**n-(1-sqrt(5))**n)/(2**n*sqrt(5))
+    #return pow(2 << n, n + 1, (4 << 2*n) - (2 << n) - 1) % (2 << n)
+
+def mul(a, b):
+    return a[0] * b[1] + a[1] * b[0] + a[0] * b[0], a[0] * b[0] + a[1] * b[1]
+
+
+def F(n):
+    x, r = (1, 0), (0, 1)
+    while n:
+        if n & 1: r = mul(r, x)
+        x = mul(x, x)
+        n >>= 1
+    return r[0]
+
+def number_of_digits(num):
+    return int(log10(num)) + 1
+
+def first_n_digits(num, digits):
+    return num / 10**(number_of_digits(num)-digits)
+
