@@ -1,6 +1,6 @@
 package euler
 
-import euler.EulerTools.{NumberToPrimeFactors, primeFactors, time}
+import euler.EulerTools.{primeFactors, time}
 
 /**
   * https://projecteuler.net/problem=5
@@ -16,10 +16,14 @@ import euler.EulerTools.{NumberToPrimeFactors, primeFactors, time}
 
 /**
   * It's unreal how many different approaches I have used trying to solve this and how much time
-  * I've spent. But here it finally is, actually pretty proud about myself: did not give up and
+  * I've spent. But here it finally is, actually pretty proud of myself: did not give up and
   * also was able to determine the solution on my own. And now that I think of it it actually makes
   * a lot of sense (reduce input sequence to list of prime factors and keep enough powers for each
   * primes so that division by input is even.)
+  *
+  * Second version of solution drops optimization by checking for solution after processing each
+  * number of input list. Instead get prime factors of ever number in input and then for each
+  * prime take the highest power and multiply those to get solution.
   *
   * Attending the EPFL Scala functional programming course the second time helped a lot (a few
   * years ago it was way too difficult.)
@@ -29,48 +33,29 @@ object p005 extends App {
 
   time {
 
-    case class PrimeToPower(n: Int, p: Int) {
-      def value: Int = math.pow(n, p).toInt
+    case class PrimeToPower(n: Int, power: Int) {
+      def value: Int = math.pow(n, power).toInt
     }
 
     val limit = 20
     val allNums: List[Int] = (1 to limit).toList
 
-    // Compute product of primes-to-power in map and check for solution
-    def isSolution(primeMap: Map[Int, PrimeToPower]): (Boolean, Int) = {
-      val currentProduct = primeMap.mapValues(_.value).values.product
-      val sol = allNums.map(n => currentProduct % n).forall(_ == 0)
-      (sol, currentProduct)
-    }
-
-    // Compute updates to accumulator: if acc holds a key for prime, compare
-    // power in stored prime-to-power and if it's not large enough, return
-    // a new instance with larger power. If there's no key yet, use current instance.
-
-    def updatesForNumber(n: NumberToPrimeFactors, acc: Map[Int, PrimeToPower]): List[(Int, PrimeToPower)] = {
-      val primeCounts = n.ps.groupBy(identity).mapValues(l => l.length)
-        .map(elem => PrimeToPower(elem._1, elem._2))
-      val accUpdates = primeCounts.map(p2p => {
-        val prime = p2p.n
-        val oldValue = acc.getOrElse(prime, p2p)
-        if (p2p.p > oldValue.p) (prime, p2p) else (prime, oldValue)
-      })
-      accUpdates.toList
-    }
-
     val primeFactorsList = allNums.map(primeFactors)
 
-    def loop(num2Primes: List[NumberToPrimeFactors], acc: Map[Int, PrimeToPower]): Int = {
-      val (foundSolution, currentProduct) = isSolution(acc)
-      if (foundSolution) currentProduct
-      else
-        num2Primes match {
-          case List() => throw new Error("loop run out of primes before finding solution!")
-          case x :: xs => loop(xs, acc ++ updatesForNumber(x, acc))
-        }
-    }
+    val ans = (
+      for {
+        primeList <- primeFactorsList.map(np => np.primes) // NumberToPrimeFactors(10,List(5, 2)) => List(5, 2)
+        ps = primeList.groupBy(identity) // 10 -> Map(2 -> List(2), 5 -> List(5)))
+        primeToPower = ps.map(elem => PrimeToPower(elem._1, elem._2.length))
+      } yield primeToPower // for 10: List(PrimeToPower(2,1), PrimeToPower(5,1)))
+      )
+      .flatten // single list of PrimeToPower instances
+      .groupBy(_.n) // collect by prime: 3 -> List(PrimeToPower(3,1), PrimeToPower(3,1), PrimeToPower(3,2)))
+      .mapValues(l => l.map(_.power)) // pull power out into list
+      .mapValues(_.max) // get highest power from list
+      .map(pair => PrimeToPower(pair._1, pair._2).value) // new instance with highest power, expand
+      .product // take product for solution
 
-    val ans = loop(primeFactorsList, Map.empty)
     println("ANS " + ans)
     assert(ans == 232792560)
 

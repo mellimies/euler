@@ -11,7 +11,7 @@ object EulerTools {
     result
   }
 
-  case class NumberToPrimeFactors(n: Int, ps: List[Int])
+  case class NumberToPrimeFactors(n: Int, primes: List[Int])
 
   def primeFactors(n: Int): NumberToPrimeFactors = {
     val primes = List(2, 3, 5, 7, 11, 13, 17, 19)
