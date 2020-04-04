@@ -78,57 +78,80 @@ object p011 extends App {
       col <- inputSeq
     } yield (row, col)
 
-    val left2right: Int = {
-      def positions(r: Int, c: Int) = 0 until seqSize map(n => (r, c + n))
-      def loop(row: Int, col: Int): Option[Int] = {
-//        println(s"L->R at (${row}, ${col})")
-        (row, col) match {
-          case (_, c) if c > inputSize - seqSize => None
-          case (r, _) if r > inputSize => None
-          case (r, c) => Some(positions(r, c).map(p => input(p._1)(p._2)).product)
-        }
+    abstract class P11 {
+
+      val rowMin = 0
+      val colMin = 0
+
+      val rowMax: Int // concrete classes know what these are
+      val colMax: Int
+
+      val rowUpdate: Int // for concrete classes how to move by row (0 or 1)
+      val colUpdate: Int
+
+      def validPosition(position: (Int, Int)): Boolean = {
+        //        println("POS " + position)
+        val (row, col) = position
+        row >= rowMin && row <= rowMax &&
+          col >= colMin && col <= colMax
       }
-      inputIndexes.map(p => loop(p._1, p._2)).max.getOrElse(0)
+
+      def value(position: (Int, Int)): Option[Int] =
+        if (!validPosition(position)) None
+        else Some(positions(position).map(p => input(p._1)(p._2)).product)
+
+      def positions(fromPosition: (Int, Int)): Seq[(Int, Int)] = {
+        val (row, col) = fromPosition
+        0 until seqSize map (n => (row + n * rowUpdate, col + n * colUpdate))
+      }
     }
 
-    val up2down: Int = {
-      def positions(r: Int, c: Int) = 0 until seqSize map(n => (r + n, c))
-      def loop(row: Int, col: Int): Option[Int] = {
-//        println(s"U->D at (${row}, ${col})")
-        (row, col) match {
-          case (_, c) if c > inputSize => None
-          case (r, _) if r > inputSize - seqSize => None
-          case (r, c) => Some(positions(r, c).map(p => input(p._1)(p._2)).product)
-        }
-      }
-      inputIndexes.map(p => loop(p._1, p._2)).max.getOrElse(0)
+    object Left2Right extends P11 {
+
+      override val rowMax: Int = inputSize - 1
+      override val colMax: Int = inputSize - seqSize
+
+      override val rowUpdate: Int = 0
+      override val colUpdate: Int = 1
+
     }
 
-    val topLeft2BottomRight: Int = {
-      def positions(r: Int, c: Int) = 0 until seqSize map(n => (r + n, c + n))
-      def loop(row: Int, col: Int): Option[Int] = {
-//        println(s"LT->BR at (${row}, ${col})")
-        (row, col) match {
-          case (_, c) if c > inputSize - seqSize => None
-          case (r, _) if r > inputSize - seqSize => None
-          case (r, c) => Some(positions(r, c).map(p => input(p._1)(p._2)).product)
-        }
-      }
-      inputIndexes.map(p => loop(p._1, p._2)).max.getOrElse(0)
+    object Up2Down extends P11 {
+
+      override val rowMax: Int = inputSize - seqSize
+      override val colMax: Int = inputSize - 1
+
+      override val rowUpdate: Int = 1
+      override val colUpdate: Int = 0
+
     }
 
-    val topRight2BottomLeft: Int = {
-      def positions(r: Int, c: Int) = 0 until seqSize map(n => (r + n, c - n))
-      def loop(row: Int, col: Int): Option[Int] = {
-//        println(s"LT->BR at (${row}, ${col})")
-        (row, col) match {
-          case (_, c) if c < seqSize - 1 => None
-          case (r, _) if r > inputSize - seqSize => None
-          case (r, c) => Some(positions(r, c).map(p => input(p._1)(p._2)).product)
-        }
-      }
-      inputIndexes.map(p => loop(p._1, p._2)).max.getOrElse(0)
+    object TopLeft2BottomRight extends P11 {
+
+      override val rowMax: Int = inputSize - seqSize
+      override val colMax: Int = inputSize - seqSize
+
+      override val rowUpdate: Int = 1
+      override val colUpdate: Int = 1
+
     }
+
+    object TopRight2BottomLeft extends P11 {
+
+      override val colMin: Int = seqSize - 1 // start from col = 3
+
+      override val rowMax: Int = inputSize - seqSize
+      override val colMax: Int = inputSize - 1
+
+      override val rowUpdate: Int = 1
+      override val colUpdate: Int = -1
+
+    }
+
+    val left2right: Int = inputIndexes.map(Left2Right.value).max.getOrElse(0)
+    val up2down: Int = inputIndexes.map(Up2Down.value).max.getOrElse(0)
+    val topLeft2BottomRight: Int = inputIndexes.map(TopLeft2BottomRight.value).max.getOrElse(0)
+    val topRight2BottomLeft: Int = inputIndexes.map(TopRight2BottomLeft.value).max.getOrElse(0)
 
     val ans = List(left2right, up2down, topLeft2BottomRight, topRight2BottomLeft).max
     println("ANS " + ans)
