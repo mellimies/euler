@@ -2,8 +2,6 @@ package main.scala.euler
 
 import euler.EulerTools.time
 
-import scala.language.implicitConversions
-
 object p089 extends App {
 
   /**
