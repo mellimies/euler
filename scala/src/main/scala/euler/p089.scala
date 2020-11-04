@@ -34,10 +34,13 @@ object p089 extends App {
   time {
 
     import scala.annotation.tailrec
-    val numbers = List(1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1)
-    val numerals = List("M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I")
-    val numeralToInt = (numerals zip numbers).toMap
-    val intToNumeral = (numbers zip numerals).toMap
+
+    val numeralPairs = List(1000 -> "M", 900 -> "CM", 500 -> "D", 400 -> "CD", 100 -> "C",
+      90 -> "XC", 50 -> "L", 40 -> "XL", 10 -> "X", 9 -> "IX", 5 -> "V", 4 -> "IV", 1 -> "I")
+
+    val numeralToInt = numeralPairs.map(_.swap).toMap
+    val intToNumeral = numeralPairs.toMap
+    val numbers = numeralPairs.map(_._1)
 
     class RomanNumeralParser extends util.parsing.combinator.RegexParsers {
 
