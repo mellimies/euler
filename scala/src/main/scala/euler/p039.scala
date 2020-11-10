@@ -24,8 +24,8 @@ object p039 extends App {
 
     val trianglesWithP = for {
       p <- 1 to pLimit
-      a <- 1 to p // surely can be optimized but brute force works too, runtime a couple of seconds
-      b <- a to p // a is smallest side
+      a <- 1 to p / 3 // a is smallest so has to be at most 1/3 of p
+      b <- a + 1 to p * 2 / 3 // b is between a and 2p/3
       if isValidTriangle(p, a, b)
     } yield p -> (a, b)
 
